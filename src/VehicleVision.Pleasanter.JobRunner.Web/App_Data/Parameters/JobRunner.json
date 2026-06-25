@@ -1,0 +1,5 @@
+{
+  "AuthorizationCheckColumn": "CheckA",
+  "PythonExecutablePath": "python",
+  "AllowPlainTextPasswordHashForDevelopment": false
+}

@@ -1,0 +1,4 @@
+{
+  "Dbms": "SQLServer",
+  "UserConnectionString": "Server=localhost;Database=Implem.Pleasanter;Integrated Security=True;TrustServerCertificate=True;"
+}
