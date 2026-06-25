@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build client assets
+        run: npm run build
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: npm audit
+        run: npm run audit
+
+      - name: Restore .NET dependencies
+        run: dotnet restore VehicleVision.Pleasanter.JobRunner.slnx
+
+      - name: Build .NET solution
+        run: dotnet build VehicleVision.Pleasanter.JobRunner.slnx --configuration Release --no-restore
+
+      - name: Test .NET solution
+        run: dotnet test VehicleVision.Pleasanter.JobRunner.slnx --configuration Release --no-build --logger trx --results-directory TestResults
+
+      - name: NuGet vulnerability audit
+        run: dotnet list VehicleVision.Pleasanter.JobRunner.slnx package --vulnerable --include-transitive
