@@ -1,11 +1,13 @@
 using Hangfire;
 using Hangfire.Console;
 using Hangfire.MemoryStorage;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using VehicleVision.Pleasanter.JobRunner.Core.Authentication;
 using VehicleVision.Pleasanter.JobRunner.Core.Configuration;
 using VehicleVision.Pleasanter.JobRunner.Core.Data;
 using VehicleVision.Pleasanter.JobRunner.Core.Scripting;
 using VehicleVision.Pleasanter.JobRunner.Web.Jobs;
+using VehicleVision.Pleasanter.JobRunner.Web.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,16 @@ builder.Services.AddSingleton<IScriptExecutionEngine>(sp =>
 builder.Services.AddSingleton<ScriptExecutionDispatcher>();
 builder.Services.AddTransient<ScriptJob>();
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "VehicleVision.JobRunner.Auth";
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/Login";
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization();
+
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
@@ -54,7 +66,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    DashboardTitle = "JobRunner Hangfire",
+    Authorization = new[] { new CookieDashboardAuthorizationFilter() }
+});
 
 app.MapRazorPages();
 

@@ -1,10 +1,96 @@
-﻿@page
-@model IndexModel
+@page
+@using VehicleVision.Pleasanter.JobRunner.Core.Scripting
+@model VehicleVision.Pleasanter.JobRunner.Web.Pages.IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Jobs";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<section class="page-heading">
+    <div>
+        <h1>Script Jobs</h1>
+        <p>@User.Identity?.Name</p>
+    </div>
+    <a class="secondary-action" href="/hangfire">Hangfire</a>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="status-message">@Model.StatusMessage</div>
+}
+
+<div class="workspace-grid">
+    <section class="tool-panel editor-panel">
+        <form method="post" class="job-form">
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <div class="form-row two-columns">
+                <div>
+                    <label asp-for="Input.JobName"></label>
+                    <input asp-for="Input.JobName" />
+                    <span asp-validation-for="Input.JobName" class="field-validation"></span>
+                </div>
+                <div>
+                    <label asp-for="Input.Language"></label>
+                    <select asp-for="Input.Language" asp-items="Html.GetEnumSelectList<ScriptLanguage>()"></select>
+                    <span asp-validation-for="Input.Language" class="field-validation"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label asp-for="Input.ScriptCode"></label>
+                <textarea asp-for="Input.ScriptCode" spellcheck="false"></textarea>
+                <span asp-validation-for="Input.ScriptCode" class="field-validation"></span>
+            </div>
+
+            <div class="form-row command-row">
+                <div class="cron-field">
+                    <label asp-for="Input.CronExpression"></label>
+                    <input asp-for="Input.CronExpression" placeholder="0 9 * * *" />
+                    <span asp-validation-for="Input.CronExpression" class="field-validation"></span>
+                </div>
+                <div class="actions">
+                    <button type="submit" asp-page-handler="RunNow" class="primary-action">Run now</button>
+                    <button type="submit" asp-page-handler="Schedule" class="secondary-action">Schedule</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="tool-panel schedule-panel">
+        <div class="panel-header">
+            <h2>Scheduled scripts</h2>
+        </div>
+        @if (Model.ScheduledJobs.Count == 0)
+        {
+            <p class="empty-state">No scheduled scripts.</p>
+        }
+        else
+        {
+            <table class="job-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cron</th>
+                        <th>Next</th>
+                        <th>State</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var job in Model.ScheduledJobs)
+                {
+                    <tr>
+                        <td>@job.Id</td>
+                        <td>@job.Cron</td>
+                        <td>@job.NextExecution?.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@job.LastJobState</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </section>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
