@@ -28,6 +28,25 @@ public sealed class ConfigurationParameterLoader : IParameterLoader
         return merged;
     }
 
+    public HangfireRdsParameters LoadHangfireRds()
+    {
+        var json = _inner.LoadHangfireRds();
+        var merged = new HangfireRdsParameters
+        {
+            Dbms = GetFirst(
+                "JobRunner:HangfireRds:Dbms",
+                "JobRunner:Hangfire:Rds:Dbms",
+                "HangfireRds:Dbms") ?? json.Dbms,
+            ConnectionString = GetFirst(
+                "JobRunner:HangfireRds:ConnectionString",
+                "JobRunner:Hangfire:Rds:ConnectionString",
+                "HangfireRds:ConnectionString") ?? json.ConnectionString
+        };
+
+        merged.Validate();
+        return merged;
+    }
+
     public JobRunnerParameters LoadJobRunner()
     {
         var json = _inner.LoadJobRunner();

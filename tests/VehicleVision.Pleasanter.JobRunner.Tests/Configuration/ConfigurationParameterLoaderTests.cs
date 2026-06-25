@@ -41,6 +41,21 @@ public sealed class ConfigurationParameterLoaderTests
         Assert.True(result.AllowPlainTextPasswordHashForDevelopment);
     }
 
+    [Fact]
+    public void LoadHangfireRds_WhenConfigurationContainsOverrides_UsesConfigurationValues()
+    {
+        var loader = CreateLoader(new Dictionary<string, string?>
+        {
+            ["JobRunner:HangfireRds:Dbms"] = "SQLServer",
+            ["JobRunner:HangfireRds:ConnectionString"] = "Server=hangfire;Database=jobs"
+        });
+
+        var result = loader.LoadHangfireRds();
+
+        Assert.Equal("SQLServer", result.Dbms);
+        Assert.Equal("Server=hangfire;Database=jobs", result.ConnectionString);
+    }
+
     private static ConfigurationParameterLoader CreateLoader(Dictionary<string, string?> values)
     {
         var configuration = new ConfigurationBuilder()
@@ -59,6 +74,11 @@ public sealed class ConfigurationParameterLoaderTests
                 Dbms = "SQLServer",
                 UserConnectionString = "Server=localhost;Database=pleasanter"
             };
+        }
+
+        public HangfireRdsParameters LoadHangfireRds()
+        {
+            return new HangfireRdsParameters();
         }
 
         public JobRunnerParameters LoadJobRunner()

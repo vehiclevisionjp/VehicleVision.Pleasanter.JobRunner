@@ -40,6 +40,13 @@ public sealed class JsonParameterLoader : IParameterLoader
         return parameters;
     }
 
+    public HangfireRdsParameters LoadHangfireRds()
+    {
+        var parameters = LoadOptional("HangfireRds.json", new HangfireRdsParameters());
+        parameters.Validate();
+        return parameters;
+    }
+
     public JobRunnerParameters LoadJobRunner()
     {
         var parameters = LoadRequired<JobRunnerParameters>("JobRunner.json");
@@ -57,6 +64,23 @@ public sealed class JsonParameterLoader : IParameterLoader
                 $"Required parameter file '{path}' was not found. Create it under App_Data/Parameters.");
         }
 
+        return LoadExisting<T>(path);
+    }
+
+    private T LoadOptional<T>(string fileName, T defaultValue)
+    {
+        var path = Path.Combine(_parameterDirectory, fileName);
+
+        if (!File.Exists(path))
+        {
+            return defaultValue;
+        }
+
+        return LoadExisting<T>(path);
+    }
+
+    private static T LoadExisting<T>(string path)
+    {
         try
         {
             using var stream = File.OpenRead(path);

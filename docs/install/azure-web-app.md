@@ -29,6 +29,8 @@ az webapp config appsettings set \
     ASPNETCORE_ENVIRONMENT=Production \
     JobRunner__Rds__Dbms=SQLServer \
     JobRunner__Rds__UserConnectionString="Server=tcp:<server>.database.windows.net,1433;Initial Catalog=<database>;User ID=<user>;Password=<password>;Encrypt=True;TrustServerCertificate=False;" \
+    JobRunner__HangfireRds__Dbms=SQLServer \
+    JobRunner__HangfireRds__ConnectionString="Server=tcp:<server>.database.windows.net,1433;Initial Catalog=<hangfire-database>;User ID=<user>;Password=<password>;Encrypt=True;TrustServerCertificate=False;" \
     JobRunner__Authorization__UsersCheckColumn=CheckA \
     JobRunner__Authorization__GroupsCheckColumn=CheckB \
     JobRunner__Authorization__DeptsCheckColumn=CheckC \
@@ -40,5 +42,5 @@ If Python execution is required, validate Python availability for the selected A
 ## Notes
 
 - Keep secrets in App Service app settings or Key Vault references, not in JSON files committed to source control.
-- Hangfire uses in-memory storage in this project. App restarts clear queued and recurring jobs.
-- Scale-out with in-memory Hangfire storage is not recommended; move Hangfire storage to a durable backend before multi-instance production use.
+- Hangfire uses memory storage unless `JobRunner__HangfireRds__Dbms` and `JobRunner__HangfireRds__ConnectionString` are configured.
+- Use a separate SQL Server database for Hangfire storage before multi-instance production use.

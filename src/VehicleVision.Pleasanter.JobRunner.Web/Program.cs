@@ -1,6 +1,7 @@
 using Hangfire;
 using Hangfire.Console;
 using Hangfire.MemoryStorage;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using VehicleVision.Pleasanter.JobRunner.Core.Authentication;
 using VehicleVision.Pleasanter.JobRunner.Core.Configuration;
@@ -17,13 +18,17 @@ if (builder.Environment.IsDevelopment())
 }
 
 var parameterDirectory = JsonParameterLoader.GetDefaultParameterDirectory(builder.Environment.ContentRootPath);
-builder.Services.AddSingleton<IParameterLoader>(_ =>
-{
-    var jsonLoader = new JsonParameterLoader(parameterDirectory);
-    return new ConfigurationParameterLoader(jsonLoader, builder.Configuration);
-});
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IParameterLoader>().LoadRds());
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IParameterLoader>().LoadJobRunner());
+var parameterLoader = new ConfigurationParameterLoader(
+    new JsonParameterLoader(parameterDirectory),
+    builder.Configuration);
+var rdsParameters = parameterLoader.LoadRds();
+var hangfireRdsParameters = parameterLoader.LoadHangfireRds();
+var jobRunnerParameters = parameterLoader.LoadJobRunner();
+
+builder.Services.AddSingleton<IParameterLoader>(parameterLoader);
+builder.Services.AddSingleton(rdsParameters);
+builder.Services.AddSingleton(hangfireRdsParameters);
+builder.Services.AddSingleton(jobRunnerParameters);
 builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 builder.Services.AddScoped<IPleasanterAuthRepository, DapperPleasanterAuthRepository>();
 builder.Services.AddSingleton<IPasswordHashVerifier>(sp =>
@@ -52,12 +57,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 builder.Services.AddAuthorization();
 
-builder.Services.AddHangfire(configuration => configuration
-    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-    .UseSimpleAssemblyNameTypeSerializer()
-    .UseRecommendedSerializerSettings()
-    .UseMemoryStorage()
-    .UseConsole());
+builder.Services.AddHangfire(configuration =>
+{
+    configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings();
+
+    UseConfiguredHangfireStorage(configuration, hangfireRdsParameters);
+
+    configuration.UseConsole();
+});
 builder.Services.AddHangfireServer();
 
 builder.Services.AddRazorPages();
@@ -87,5 +97,21 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 app.MapRazorPages();
 
 app.Run();
+
+static void UseConfiguredHangfireStorage(IGlobalConfiguration configuration, HangfireRdsParameters parameters)
+{
+    if (parameters.UsesMemoryStorage())
+    {
+        configuration.UseMemoryStorage();
+        return;
+    }
+
+    _ = parameters.GetDbms() switch
+    {
+        SupportedDbms.SQLServer => configuration.UseSqlServerStorage(parameters.ConnectionString),
+        _ => throw new ParameterLoadException(
+            "HangfireRds currently supports SQLServer only. Use Memory or SQLServer.")
+    };
+}
 
 public partial class Program;

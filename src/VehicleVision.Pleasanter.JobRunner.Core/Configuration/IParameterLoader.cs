@@ -4,5 +4,7 @@ public interface IParameterLoader
 {
     RdsParameters LoadRds();
 
+    HangfireRdsParameters LoadHangfireRds();
+
     JobRunnerParameters LoadJobRunner();
 }

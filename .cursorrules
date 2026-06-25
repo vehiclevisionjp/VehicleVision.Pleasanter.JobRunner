@@ -11,7 +11,7 @@ Follow these rules for every code change.
 - Binding: Knockout.js from npm.
 - Styles: SCSS under `ClientApp/scss`, compiled by npm/sass.
 - Bootstrap must be consumed from npm as SCSS, not vendored `wwwroot/lib` CSS.
-- Background jobs: Hangfire.Core, Hangfire.AspNetCore, Hangfire.Console, and in-memory storage.
+- Background jobs: Hangfire.Core, Hangfire.AspNetCore, Hangfire.Console, and Memory / SQL Server storage.
 - Dynamic C# execution: Microsoft.CodeAnalysis.CSharp.Scripting.
 - Data access: Dapper plus Microsoft.Data.SqlClient, Npgsql, and MySqlConnector.
 - Tests: xUnit and Moq.
@@ -53,6 +53,11 @@ Follow these rules for every code change.
 - Python scripts are written to a temporary file and executed through the configured Python command.
 - Python standard output and standard error must be streamed to Hangfire.Console.
 - Treat script execution as privileged server-side code.
+
+## Documentation
+
+- Use Mermaid for diagrams in Markdown files.
+- Do not add ASCII-art tree diagrams or text-only diagrams when a Mermaid diagram can express the same structure.
 
 ## Project hygiene
 
