@@ -16,27 +16,44 @@ public sealed class HangfireRdsParametersTests
         parameters.Validate();
     }
 
-    [Fact]
-    public void Validate_WhenDbmsIsSqlServer_RequiresConnectionString()
+    [Theory]
+    [InlineData("SQLServer")]
+    [InlineData("PostgreSQL")]
+    public void Validate_WhenDbmsIsDurableStorage_RequiresConnectionString(string dbms)
     {
         var parameters = new HangfireRdsParameters
         {
-            Dbms = "SQLServer",
+            Dbms = dbms,
             ConnectionString = string.Empty
         };
 
         Assert.Throws<ParameterLoadException>(parameters.Validate);
     }
 
-    [Fact]
-    public void Validate_WhenDbmsIsPostgreSql_ThrowsUnsupportedStorageProvider()
+    [Theory]
+    [InlineData("SQLServer", "Server=db;Database=hangfire")]
+    [InlineData("PostgreSQL", "Host=db;Database=hangfire")]
+    public void Validate_WhenDbmsIsSupportedDurableStorage_AllowsConnectionString(string dbms, string connectionString)
     {
         var parameters = new HangfireRdsParameters
         {
-            Dbms = "PostgreSQL",
-            ConnectionString = "Host=db;Database=hangfire"
+            Dbms = dbms,
+            ConnectionString = connectionString
         };
 
-        Assert.Throws<ParameterLoadException>(parameters.Validate);
+        parameters.Validate();
+    }
+
+    [Fact]
+    public void Validate_WhenDbmsIsMySql_ThrowsUnsupportedStorageProvider()
+    {
+        var parameters = new HangfireRdsParameters
+        {
+            Dbms = "MySQL",
+            ConnectionString = "Server=db;Database=hangfire"
+        };
+
+        var exception = Assert.Throws<ParameterLoadException>(parameters.Validate);
+        Assert.Contains("does not support MySQL", exception.Message);
     }
 }

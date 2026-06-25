@@ -1,6 +1,7 @@
 using Hangfire;
 using Hangfire.Console;
 using Hangfire.MemoryStorage;
+using Hangfire.PostgreSql;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using VehicleVision.Pleasanter.JobRunner.Core.Authentication;
@@ -106,12 +107,19 @@ static void UseConfiguredHangfireStorage(IGlobalConfiguration configuration, Han
         return;
     }
 
-    _ = parameters.GetDbms() switch
+    switch (parameters.GetDbms())
     {
-        SupportedDbms.SQLServer => configuration.UseSqlServerStorage(parameters.ConnectionString),
-        _ => throw new ParameterLoadException(
-            "HangfireRds currently supports SQLServer only. Use Memory or SQLServer.")
-    };
+        case SupportedDbms.SQLServer:
+            configuration.UseSqlServerStorage(parameters.ConnectionString);
+            break;
+        case SupportedDbms.PostgreSQL:
+            configuration.UsePostgreSqlStorage(
+                options => options.UseNpgsqlConnection(parameters.ConnectionString));
+            break;
+        default:
+            throw new ParameterLoadException(
+                "HangfireRds currently supports SQLServer and PostgreSQL only. Use Memory, SQLServer, or PostgreSQL.");
+    }
 }
 
 public partial class Program;

@@ -3,7 +3,7 @@
 VehicleVision.Pleasanter.JobRunner is a web application for managing C# and Python script execution within the same operational boundary as Pleasanter.
 
 - ASP.NET Core 10 Razor Pages
-- Hangfire + Hangfire.Console + Memory / SQL Server storage
+- Hangfire + Hangfire.Console + Memory / SQL Server / PostgreSQL storage
 - C# dynamic scripting via Roslyn
 - Python external process execution
 - Dapper based SQL Server / PostgreSQL / MySQL access
@@ -93,12 +93,21 @@ Supported `Dbms` values:
 
 ### HangfireRds.json
 
-Hangfire storage uses memory by default. For production or multi-instance hosting, point Hangfire at a separate SQL Server database:
+Hangfire storage uses memory by default. For production or multi-instance hosting, point Hangfire at a separate SQL Server or PostgreSQL database:
 
 ```json
 {
   "Dbms": "SQLServer",
   "ConnectionString": "Server=localhost;Database=JobRunnerHangfire;Integrated Security=True;TrustServerCertificate=True;"
+}
+```
+
+PostgreSQL example:
+
+```json
+{
+  "Dbms": "PostgreSQL",
+  "ConnectionString": "Host=localhost;Database=jobrunner_hangfire;Username=jobrunner;Password=change-me"
 }
 ```
 
@@ -108,6 +117,9 @@ Supported `Dbms` values:
 
 - `Memory`
 - `SQLServer`
+- `PostgreSQL`
+
+`MySQL` is not supported for Hangfire storage in this project. MySQL remains supported for Pleasanter data access through `Rds.json`.
 
 ### JobRunner.json
 
@@ -220,4 +232,4 @@ Because this is a network application, modified versions offered over a network 
 
 JobRunner executes arbitrary C# and Python code on the server. Deploy it only for trusted administrators and inside the same operational boundary as the Pleasanter instance it manages.
 
-Hangfire uses memory storage by default. Configure `HangfireRds.json` or `JobRunner__HangfireRds__...` with a separate SQL Server database before multi-instance production deployment.
+Hangfire uses memory storage by default. Configure `HangfireRds.json` or `JobRunner__HangfireRds__...` with a separate SQL Server or PostgreSQL database before multi-instance production deployment. MySQL is intentionally not supported for Hangfire storage in this project.

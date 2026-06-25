@@ -43,4 +43,4 @@ If Python execution is required, validate Python availability for the selected A
 
 - Keep secrets in App Service app settings or Key Vault references, not in JSON files committed to source control.
 - Hangfire uses memory storage unless `JobRunner__HangfireRds__Dbms` and `JobRunner__HangfireRds__ConnectionString` are configured.
-- Use a separate SQL Server database for Hangfire storage before multi-instance production use.
+- Use a separate SQL Server or PostgreSQL database for Hangfire storage before multi-instance production use. MySQL is not supported for Hangfire storage in this project.

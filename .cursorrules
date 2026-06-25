@@ -11,7 +11,7 @@ Follow these rules for every code change.
 - Binding: Knockout.js from npm.
 - Styles: SCSS under `ClientApp/scss`, compiled by npm/sass.
 - Bootstrap must be consumed from npm as SCSS, not vendored `wwwroot/lib` CSS.
-- Background jobs: Hangfire.Core, Hangfire.AspNetCore, Hangfire.Console, and Memory / SQL Server storage.
+- Background jobs: Hangfire.Core, Hangfire.AspNetCore, Hangfire.Console, and Memory / SQL Server / PostgreSQL storage.
 - Dynamic C# execution: Microsoft.CodeAnalysis.CSharp.Scripting.
 - Data access: Dapper plus Microsoft.Data.SqlClient, Npgsql, and MySqlConnector.
 - Tests: xUnit and Moq.
@@ -22,6 +22,7 @@ Follow these rules for every code change.
 - Base runtime configuration must be read from `App_Data/Parameters/`, matching Pleasanter's layout.
 - User Secrets, environment variables, and Azure Web App application settings may override JSON values.
 - Use `JobRunner__...` environment variable names for nested configuration.
+- MySQL is not supported for Hangfire storage; use Memory, SQL Server, or PostgreSQL for `HangfireRds.json`.
 - `Rds.json` is the base source for database provider and connection string.
 - `JobRunner.json` is the base source for JobRunner-specific settings such as table-specific authorization check columns and Python executable path.
 - Parameter loaders must fail with actionable messages when required JSON files or fields are missing.
