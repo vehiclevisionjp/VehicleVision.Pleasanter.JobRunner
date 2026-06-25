@@ -7,9 +7,9 @@ const scriptSamples: Record<string, string> = {
 };
 
 class JobRunnerViewModel {
-  readonly selectedLanguage: KnockoutObservable<string>;
-  readonly scriptCode: KnockoutObservable<string>;
-  readonly sampleButtonText: KnockoutComputed<string>;
+  readonly selectedLanguage: ko.Observable<string>;
+  readonly scriptCode: ko.Observable<string>;
+  readonly sampleButtonText: ko.Computed<string>;
 
   constructor(root: HTMLElement) {
     const languageSelect = root.querySelector<HTMLSelectElement>("[data-jobrunner-language]");
