@@ -2,9 +2,9 @@
 
 言語: 日本語 | [English](azure-web-app.en.md)
 
-Azure App Service application settings は ASP.NET Core から environment variables として参照できます。JobRunner は on-premises hosts と同じ `JobRunner__...` keys でこれらの settings を読み込みます。
+Azure App Service のアプリケーション設定は、ASP.NET Core から環境変数として参照できます。JobRunner はオンプレミス環境と同じ `JobRunner__...` キーでこれらの設定を読み込みます。
 
-## Build artifact
+## ビルド成果物の作成
 
 ```bash
 npm ci
@@ -12,7 +12,7 @@ npm run build
 dotnet publish src/VehicleVision.Pleasanter.JobRunner.Web/VehicleVision.Pleasanter.JobRunner.Web.csproj -c Release -o ./publish/JobRunner
 ```
 
-Zip deploy example:
+Zip デプロイの例:
 
 ```bash
 cd publish/JobRunner
@@ -21,7 +21,7 @@ cd ../..
 az webapp deployment source config-zip --resource-group <resource-group> --name <app-name> --src publish/jobrunner.zip
 ```
 
-## App settings
+## アプリケーション設定
 
 ```bash
 az webapp config appsettings set \
@@ -39,10 +39,10 @@ az webapp config appsettings set \
     JobRunner__PythonExecutablePath=python
 ```
 
-Python execution が必要な場合は、選択した App Service plan と OS で Python が利用できるか確認してください。より厳密に control したい場合は、.NET, Node build output, Python を含む custom container image を使います。
+Python 実行が必要な場合は、選択した App Service プランと OS で Python を利用できるか確認してください。より厳密に制御したい場合は、.NET、Node のビルド成果物、Python を含むカスタム コンテナー イメージを使います。
 
-## Notes
+## 注意事項
 
-- Secrets は source control に commit する JSON files ではなく、App Service app settings または Key Vault references に保持してください。
-- `JobRunner__HangfireRds__Dbms` と `JobRunner__HangfireRds__ConnectionString` を設定しない場合、Hangfire は memory storage を使います。
-- Multi-instance production use の前に、Hangfire storage 用の separate SQL Server または PostgreSQL database を使ってください。MySQL はこの project の Hangfire storage としては supported ではありません。
+- シークレットは、ソース管理にコミットする JSON ファイルではなく、App Service のアプリケーション設定または Key Vault 参照に保存してください。
+- `JobRunner__HangfireRds__Dbms` と `JobRunner__HangfireRds__ConnectionString` を設定しない場合、Hangfire はメモリストレージを使います。
+- 複数インスタンス構成の本番環境で使う前に、Hangfire ストレージ用の SQL Server または PostgreSQL データベースを別途用意してください。MySQL は、このプロジェクトの Hangfire ストレージとしてはサポートしていません。

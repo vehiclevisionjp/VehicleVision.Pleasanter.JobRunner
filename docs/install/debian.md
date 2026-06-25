@@ -2,7 +2,7 @@
 
 言語: 日本語 | [English](debian.en.md)
 
-この guide は systemd と reverse proxy hosting を使います。Microsoft Learn では Debian 向けに `dotnet-sdk-10.0` または `aspnetcore-runtime-10.0` packages で .NET 10 SDK/runtime を install する手順が案内されています。
+このガイドでは systemd と nginx のリバースプロキシを使います。Debian での .NET 10 SDK / ランタイムのインストール方法は Microsoft Learn を参照してください。
 
 ## 前提条件
 
@@ -11,9 +11,9 @@ sudo apt-get update
 sudo apt-get install -y dotnet-sdk-10.0 nodejs npm python3 nginx
 ```
 
-Runtime-only server では `dotnet-sdk-10.0` を `aspnetcore-runtime-10.0` に置き換え、publish は別 machine で実行します。
+実行専用サーバーでは `dotnet-sdk-10.0` を `aspnetcore-runtime-10.0` に置き換え、発行は別のマシンで実行します。
 
-## Publish
+## 発行
 
 ```bash
 npm ci

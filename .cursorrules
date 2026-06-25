@@ -58,6 +58,7 @@ Follow these rules for every code change.
 ## Documentation
 
 - Japanese is the primary documentation language.
+- Write Japanese documentation in natural Japanese. Avoid mixing English technical words into Japanese prose unless the term is a product name, command, file path, setting key, or common engineering term that reads better untranslated.
 - For user-facing Markdown documentation, keep a Japanese main file and an English sibling using the `.en.md` suffix when the document has both audiences.
 - When updating a localized document, update both the Japanese and English versions in the same change. If one side cannot be updated, call that out explicitly before finishing.
 - Use Mermaid for diagrams in Markdown files.

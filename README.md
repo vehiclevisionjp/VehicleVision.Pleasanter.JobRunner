@@ -2,15 +2,15 @@
 
 言語: 日本語 | [English](README.en.md)
 
-VehicleVision.Pleasanter.JobRunner は、Pleasanter と同じ運用境界に配置する C# / Python スクリプト実行管理 Web アプリケーションです。
+VehicleVision.Pleasanter.JobRunner は、Pleasanter と同じ運用領域に配置して使う、C# / Python スクリプトの実行を管理する Web アプリケーションです。
 
 - ASP.NET Core 10 Razor Pages
-- Hangfire + Hangfire.Console + Memory / SQL Server / PostgreSQL storage
-- Roslyn による C# dynamic scripting
-- Python external process execution
-- Dapper による SQL Server / PostgreSQL / MySQL access
-- TypeScript + Knockout.js binding
-- npm の Bootstrap SCSS を使った SCSS ビルド
+- Hangfire + Hangfire.Console + メモリ / SQL Server / PostgreSQL ストレージ
+- Roslyn による C# 動的スクリプト実行
+- 外部プロセスとしての Python 実行
+- Dapper による SQL Server / PostgreSQL / MySQL 接続
+- TypeScript + Knockout.js
+- npm から取得した Bootstrap SCSS によるスタイルビルド
 - AGPL-3.0-or-later
 
 ## リポジトリ構成
@@ -38,7 +38,7 @@ flowchart TD
 - .NET SDK 10.0
 - Node.js 24 以降
 - npm
-- Python script execution を使う場合は Python
+- Python スクリプトを実行する場合は Python
 
 ```powershell
 npm ci
@@ -48,7 +48,7 @@ dotnet build VehicleVision.Pleasanter.JobRunner.slnx
 dotnet test VehicleVision.Pleasanter.JobRunner.slnx
 ```
 
-`dotnet build` は Web project から `npm run build` も実行するため、生成済み asset も同期されます。
+`dotnet build` は Web プロジェクトから `npm run build` も実行します。そのため、生成済みの静的ファイルも同時に更新されます。
 
 ## ローカル実行
 
@@ -56,12 +56,12 @@ dotnet test VehicleVision.Pleasanter.JobRunner.slnx
 dotnet run --project src/VehicleVision.Pleasanter.JobRunner.Web --urls http://localhost:5105
 ```
 
-開く URL:
+起動後に次の URL を開きます。
 
-- Web UI: `http://localhost:5105`
-- Hangfire dashboard: `http://localhost:5105/hangfire`
+- Web 画面: `http://localhost:5105`
+- Hangfire ダッシュボード: `http://localhost:5105/hangfire`
 
-## パラメーターソース
+## パラメーターの読み込み
 
 基本の JSON ファイルは次の場所に配置します。
 
@@ -69,12 +69,12 @@ dotnet run --project src/VehicleVision.Pleasanter.JobRunner.Web --urls http://lo
 src/VehicleVision.Pleasanter.JobRunner.Web/App_Data/Parameters/
 ```
 
-`appsettings.json` は意図的に使いません。実行時設定は次の順序で指定できます。
+`appsettings.json` は意図的に使いません。実行時設定は次の順序で読み込まれます。
 
 1. `App_Data/Parameters/*.json`
-2. Development の User Secrets
-3. Environment variables
-4. Environment variables として公開される Azure Web App Application settings
+2. 開発環境の User Secrets
+3. 環境変数
+4. 環境変数として公開される Azure Web App のアプリケーション設定
 
 後に読み込まれる設定ほど優先され、JSON の値を上書きします。
 
@@ -87,7 +87,7 @@ src/VehicleVision.Pleasanter.JobRunner.Web/App_Data/Parameters/
 }
 ```
 
-対応している `Dbms` values:
+指定できる `Dbms`:
 
 - `SQLServer`
 - `PostgreSQL`
@@ -95,7 +95,7 @@ src/VehicleVision.Pleasanter.JobRunner.Web/App_Data/Parameters/
 
 ### HangfireRds.json
 
-Hangfire storage は既定では memory を使います。本番環境や multi-instance hosting では、Hangfire 専用の SQL Server または PostgreSQL database を指定してください。
+Hangfire のストレージは、既定ではメモリを使います。本番環境や複数インスタンス構成では、Hangfire 専用の SQL Server または PostgreSQL データベースを指定してください。
 
 ```json
 {
@@ -113,15 +113,15 @@ PostgreSQL の例:
 }
 ```
 
-Hangfire tables と operational data を分離するため、Pleasanter 用の `Rds.json` とは別の database を使ってください。
+Hangfire のテーブルや運用データを分離するため、Pleasanter 用の `Rds.json` とは別のデータベースを使ってください。
 
-対応している `Dbms` values:
+指定できる `Dbms`:
 
 - `Memory`
 - `SQLServer`
 - `PostgreSQL`
 
-`MySQL` はこの project の Hangfire storage としては supported ではありません。Pleasanter data access では、`Rds.json` 経由で引き続き MySQL を使用できます。
+`MySQL` は、このプロジェクトの Hangfire ストレージとしてはサポートしていません。Pleasanter へのデータアクセスでは、`Rds.json` 経由で引き続き MySQL を使用できます。
 
 ### JobRunner.json
 
@@ -135,11 +135,11 @@ Hangfire tables と operational data を分離するため、Pleasanter 用の `
 }
 ```
 
-`AuthorizationCheckColumn` は backward-compatible fallback として引き続き受け付けますが、新しい deployment では table-specific settings を使ってください。
+`AuthorizationCheckColumn` は後方互換用の代替設定として引き続き受け付けます。ただし、新しい環境ではテーブルごとの設定を使ってください。
 
 ## 環境変数
 
-Nested keys には double underscores を使います。
+階層化されたキーには 2 つのアンダースコアを使います。
 
 ```powershell
 $env:JobRunner__Rds__Dbms = "SQLServer"
@@ -152,11 +152,11 @@ $env:JobRunner__Authorization__DeptsCheckColumn = "CheckC"
 $env:JobRunner__PythonExecutablePath = "python"
 ```
 
-Azure Web App でも App Service > Settings > Environment variables > App settings に同じ名前を設定します。
+Azure Web App でも、App Service > Settings > Environment variables > App settings に同じ名前で設定します。
 
 ## User Secrets
 
-Web project には `UserSecretsId` があるため、development secrets は JSON files を編集せずに設定できます。
+Web プロジェクトには `UserSecretsId` が設定されています。開発用の秘密情報は、JSON ファイルを編集せずに User Secrets へ保存できます。
 
 ```powershell
 dotnet user-secrets init --project src/VehicleVision.Pleasanter.JobRunner.Web
@@ -171,12 +171,12 @@ dotnet user-secrets set "JobRunner:Authorization:DeptsCheckColumn" "CheckC" --pr
 
 ## フロントエンド開発
 
-Source files:
+ソースファイル:
 
 - TypeScript: `src/VehicleVision.Pleasanter.JobRunner.Web/ClientApp/ts/app.ts`
 - SCSS: `src/VehicleVision.Pleasanter.JobRunner.Web/ClientApp/scss/site.scss`
 
-Build:
+ビルド:
 
 ```powershell
 npm run build
@@ -184,25 +184,25 @@ npx tsc --noEmit
 npm run audit
 ```
 
-Razor layout は次の generated assets だけを参照します。
+Razor レイアウトは、次の生成済みファイルだけを参照します。
 
 - `wwwroot/dist/site.css`
 - `wwwroot/dist/app.js`
 
 ## 認証と認可
 
-Authentication は Pleasanter の `Users.LoginId` と `Users.PasswordHash` を使います。
+認証には Pleasanter の `Users.LoginId` と `Users.PasswordHash` を使います。
 
-Authorization は hierarchy で判定します。
+認可は次の順序で判定します。
 
-1. `Users.<UsersAuthorizationCheckColumn>` が true なら allow;
-2. そうでなければ joined `Groups.<GroupsAuthorizationCheckColumn>` のいずれかが true なら allow;
-3. そうでなければ `Depts.<DeptsAuthorizationCheckColumn>` が true なら allow;
-4. それ以外は deny.
+1. `Users.<UsersAuthorizationCheckColumn>` が true なら許可する。
+2. そうでなければ、結合された `Groups.<GroupsAuthorizationCheckColumn>` のいずれかが true なら許可する。
+3. そうでなければ、`Depts.<DeptsAuthorizationCheckColumn>` が true なら許可する。
+4. それ以外は拒否する。
 
 ## CI と依存関係メンテナンス
 
-GitHub Actions で実行するもの:
+GitHub Actions では次の処理を実行します。
 
 - `npm ci`
 - `npm run build`
@@ -211,7 +211,7 @@ GitHub Actions で実行するもの:
 - `dotnet restore/build/test`
 - `dotnet list package --vulnerable --include-transitive`
 
-Dependabot は NuGet, npm, GitHub Actions 用に configured です。
+Dependabot は NuGet、npm、GitHub Actions 用に設定されています。
 
 ## インストールガイド
 
@@ -222,16 +222,16 @@ Dependabot は NuGet, npm, GitHub Actions 用に configured です。
 - Ubuntu
 - AlmaLinux
 - Azure Web App
-- Installer strategy
+- インストーラー方針
 
 ## ライセンス
 
-This project is licensed under `AGPL-3.0-or-later`. See [LICENSE](LICENSE).
+このプロジェクトは `AGPL-3.0-or-later` でライセンスされています。詳しくは [LICENSE](LICENSE) を参照してください。
 
-Because this is a network application, modified versions offered over a network must provide corresponding source code as required by AGPL section 13.
+このアプリケーションを改変してネットワーク越しに提供する場合、AGPL 第 13 条に従い、対応するソースコードを提供する必要があります。
 
 ## セキュリティメモ
 
-JobRunner executes arbitrary C# and Python code on the server. Trusted administrators のみが使えるようにし、管理対象の Pleasanter instance と同じ operational boundary の内側に deploy してください。
+JobRunner は、サーバー上で任意の C# / Python コードを実行します。信頼できる管理者だけが使えるようにし、管理対象の Pleasanter インスタンスと同じ運用境界の内側に配置してください。
 
-Hangfire は既定では memory storage を使います。Multi-instance production deployment の前に、`HangfireRds.json` または `JobRunner__HangfireRds__...` で Hangfire 専用の SQL Server または PostgreSQL database を設定してください。MySQL はこの project の Hangfire storage としては intentionally not supported です。
+Hangfire は既定ではメモリストレージを使います。複数インスタンス構成の本番環境で使う前に、`HangfireRds.json` または `JobRunner__HangfireRds__...` で Hangfire 専用の SQL Server または PostgreSQL データベースを設定してください。MySQL は、このプロジェクトの Hangfire ストレージとしては意図的にサポートしていません。
