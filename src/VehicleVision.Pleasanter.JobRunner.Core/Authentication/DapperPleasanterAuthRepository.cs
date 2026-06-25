@@ -10,7 +10,9 @@ public sealed class DapperPleasanterAuthRepository : IPleasanterAuthRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;
     private readonly SqlDialect _dialect;
-    private readonly string _authorizationCheckColumn;
+    private readonly string _usersAuthorizationCheckColumn;
+    private readonly string _groupsAuthorizationCheckColumn;
+    private readonly string _deptsAuthorizationCheckColumn;
 
     public DapperPleasanterAuthRepository(
         IDbConnectionFactory connectionFactory,
@@ -21,7 +23,9 @@ public sealed class DapperPleasanterAuthRepository : IPleasanterAuthRepository
         parameters.Validate();
 
         _dialect = SqlDialect.For(_connectionFactory.Dbms);
-        _authorizationCheckColumn = parameters.AuthorizationCheckColumn;
+        _usersAuthorizationCheckColumn = parameters.GetUsersAuthorizationCheckColumn();
+        _groupsAuthorizationCheckColumn = parameters.GetGroupsAuthorizationCheckColumn();
+        _deptsAuthorizationCheckColumn = parameters.GetDeptsAuthorizationCheckColumn();
     }
 
     public async Task<PleasanterUserRecord?> FindUserByLoginIdAsync(
@@ -35,7 +39,7 @@ public sealed class DapperPleasanterAuthRepository : IPleasanterAuthRepository
                 {_dialect.Qualified("u", "LoginId")} AS LoginId,
                 {_dialect.Qualified("u", "PasswordHash")} AS PasswordHash,
                 {_dialect.Qualified("u", "DeptId")} AS DeptId,
-                {_dialect.Qualified("u", _authorizationCheckColumn)} AS {authorizationAlias}
+                {_dialect.Qualified("u", _usersAuthorizationCheckColumn)} AS {authorizationAlias}
             FROM {_dialect.QuoteIdentifier("Users")} AS u
             WHERE {_dialect.Qualified("u", "LoginId")} = @LoginId
             """;
@@ -61,7 +65,7 @@ public sealed class DapperPleasanterAuthRepository : IPleasanterAuthRepository
     public async Task<bool> HasAuthorizedGroupAsync(long userId, CancellationToken cancellationToken = default)
     {
         var sql = $"""
-            SELECT {_dialect.Qualified("g", _authorizationCheckColumn)} AS AuthorizationValue
+            SELECT {_dialect.Qualified("g", _groupsAuthorizationCheckColumn)} AS AuthorizationValue
             FROM {_dialect.QuoteIdentifier("Groups")} AS g
             INNER JOIN {_dialect.QuoteIdentifier("Members")} AS m
                 ON {_dialect.Qualified("m", "GroupId")} = {_dialect.Qualified("g", "GroupId")}
@@ -82,7 +86,7 @@ public sealed class DapperPleasanterAuthRepository : IPleasanterAuthRepository
     public async Task<bool> IsDeptAuthorizedAsync(long deptId, CancellationToken cancellationToken = default)
     {
         var sql = $"""
-            SELECT {_dialect.Qualified("d", _authorizationCheckColumn)} AS AuthorizationValue
+            SELECT {_dialect.Qualified("d", _deptsAuthorizationCheckColumn)} AS AuthorizationValue
             FROM {_dialect.QuoteIdentifier("Depts")} AS d
             WHERE {_dialect.Qualified("d", "DeptId")} = @DeptId
             """;

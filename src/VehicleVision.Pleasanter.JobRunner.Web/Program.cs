@@ -11,8 +11,17 @@ using VehicleVision.Pleasanter.JobRunner.Web.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>(optional: true);
+}
+
 var parameterDirectory = JsonParameterLoader.GetDefaultParameterDirectory(builder.Environment.ContentRootPath);
-builder.Services.AddSingleton<IParameterLoader>(_ => new JsonParameterLoader(parameterDirectory));
+builder.Services.AddSingleton<IParameterLoader>(_ =>
+{
+    var jsonLoader = new JsonParameterLoader(parameterDirectory);
+    return new ConfigurationParameterLoader(jsonLoader, builder.Configuration);
+});
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IParameterLoader>().LoadRds());
 builder.Services.AddSingleton(sp => sp.GetRequiredService<IParameterLoader>().LoadJobRunner());
 builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
@@ -78,3 +87,5 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 app.MapRazorPages();
 
 app.Run();
+
+public partial class Program;

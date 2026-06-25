@@ -1,5 +1,7 @@
 {
-  "AuthorizationCheckColumn": "CheckA",
+  "UsersAuthorizationCheckColumn": "CheckA",
+  "GroupsAuthorizationCheckColumn": "CheckA",
+  "DeptsAuthorizationCheckColumn": "CheckA",
   "PythonExecutablePath": "python",
   "AllowPlainTextPasswordHashForDevelopment": false
 }
