@@ -1,19 +1,21 @@
-# Installer Strategy
+# Installer strategy
 
-The repository includes lightweight installer entry points that can evolve into Pleasanter-style installers.
+言語: 日本語 | [English](installer.en.md)
+
+この repository には、Pleasanter-style installers へ発展させられる lightweight installer entry points が含まれています。
 
 ## Current scripts
 
-- `installers/windows-iis/install.ps1`: publishes and prepares an IIS folder/site.
-- `installers/linux-systemd/install.sh`: publishes and installs a systemd service.
+- `installers/windows-iis/install.ps1`: publish し、IIS folder/site を準備します。
+- `installers/linux-systemd/install.sh`: publish し、systemd service を install します。
 
-They are intentionally conservative. Review parameters before running them on production servers.
+これらは意図的に conservative です。Production servers で実行する前に parameters を review してください。
 
 ## Recommended roadmap
 
-1. Add signed Windows MSI or MSIX packaging.
-2. Add `.deb` package generation for Debian/Ubuntu.
-3. Add `.rpm` package generation for AlmaLinux/RHEL-compatible environments.
-4. Add unattended install parameter files for RDBMS and Check column settings.
-5. Add upgrade mode that preserves `App_Data/Parameters` and backs up previous binaries.
-6. Add uninstall mode that removes service definitions but leaves parameter files unless explicitly requested.
+1. Signed Windows MSI または MSIX packaging を追加する。
+2. Debian/Ubuntu 向け `.deb` package generation を追加する。
+3. AlmaLinux/RHEL-compatible environments 向け `.rpm` package generation を追加する。
+4. RDBMS と Check column settings 用の unattended install parameter files を追加する。
+5. `App_Data/Parameters` を preserve し、previous binaries を backup する upgrade mode を追加する。
+6. Service definitions を削除し、明示的に requested された場合を除き parameter files は残す uninstall mode を追加する。

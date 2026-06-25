@@ -1,8 +1,9 @@
-# Azure Web App インストール
+# Azure Web App Installation
 
-言語: 日本語 | [English](azure-web-app.en.md)
+Language: [日本語](azure-web-app.md) | English
 
-Azure App Service application settings は ASP.NET Core から environment variables として参照できます。JobRunner は on-premises hosts と同じ `JobRunner__...` keys でこれらの settings を読み込みます。
+
+Azure App Service application settings are exposed to ASP.NET Core as environment variables. JobRunner reads those settings through the same `JobRunner__...` keys used on on-premises hosts.
 
 ## Build artifact
 
@@ -39,10 +40,10 @@ az webapp config appsettings set \
     JobRunner__PythonExecutablePath=python
 ```
 
-Python execution が必要な場合は、選択した App Service plan と OS で Python が利用できるか確認してください。より厳密に control したい場合は、.NET, Node build output, Python を含む custom container image を使います。
+If Python execution is required, validate Python availability for the selected App Service plan and OS. For stricter control, use a custom container image with .NET, Node build output, and Python installed.
 
 ## Notes
 
-- Secrets は source control に commit する JSON files ではなく、App Service app settings または Key Vault references に保持してください。
-- `JobRunner__HangfireRds__Dbms` と `JobRunner__HangfireRds__ConnectionString` を設定しない場合、Hangfire は memory storage を使います。
-- Multi-instance production use の前に、Hangfire storage 用の separate SQL Server または PostgreSQL database を使ってください。MySQL はこの project の Hangfire storage としては supported ではありません。
+- Keep secrets in App Service app settings or Key Vault references, not in JSON files committed to source control.
+- Hangfire uses memory storage unless `JobRunner__HangfireRds__Dbms` and `JobRunner__HangfireRds__ConnectionString` are configured.
+- Use a separate SQL Server or PostgreSQL database for Hangfire storage before multi-instance production use. MySQL is not supported for Hangfire storage in this project.

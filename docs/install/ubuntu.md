@@ -1,21 +1,23 @@
-# Ubuntu Installation
+# Ubuntu インストール
 
-Microsoft Learn lists .NET 10 packages for supported Ubuntu releases. Ubuntu 24.04 and newer can install `dotnet-sdk-10.0` and `aspnetcore-runtime-10.0` from Ubuntu feeds or documented package sources.
+言語: 日本語 | [English](ubuntu.en.md)
 
-## Prerequisites
+Microsoft Learn では supported Ubuntu releases 向けの .NET 10 packages が案内されています。Ubuntu 24.04 以降では、Ubuntu feeds または documented package sources から `dotnet-sdk-10.0` と `aspnetcore-runtime-10.0` を install できます。
+
+## 前提条件
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y dotnet-sdk-10.0 nodejs npm python3 nginx
 ```
 
-For runtime-only hosts:
+Runtime-only hosts:
 
 ```bash
 sudo apt-get install -y aspnetcore-runtime-10.0 python3 nginx
 ```
 
-Install Node.js 24 or later on the build host if the distro package is older than required.
+Distro package が要件より古い場合は、build host に Node.js 24 以降を install してください。
 
 ## Publish and deploy
 
@@ -27,4 +29,4 @@ sudo mkdir -p /opt/vehiclevision/jobrunner
 sudo rsync -a --delete ./publish/JobRunner/ /opt/vehiclevision/jobrunner/
 ```
 
-Use the same `jobrunner.service` and nginx reverse proxy layout shown in [Debian](debian.md). Set the RDBMS and connection string to match Pleasanter.
+`jobrunner.service` と nginx reverse proxy の layout は [Debian](debian.md) と同じものを使います。RDBMS と connection string は Pleasanter に合わせて設定してください。

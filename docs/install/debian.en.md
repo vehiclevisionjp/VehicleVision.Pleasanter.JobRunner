@@ -1,17 +1,18 @@
-# Debian インストール
+# Debian Installation
 
-言語: 日本語 | [English](debian.en.md)
+Language: [日本語](debian.en.md) | English
 
-この guide は systemd と reverse proxy hosting を使います。Microsoft Learn では Debian 向けに `dotnet-sdk-10.0` または `aspnetcore-runtime-10.0` packages で .NET 10 SDK/runtime を install する手順が案内されています。
 
-## 前提条件
+This guide uses systemd and reverse proxy hosting. Microsoft Learn documents installing the .NET 10 SDK/runtime on Debian with `dotnet-sdk-10.0` or `aspnetcore-runtime-10.0` packages.
+
+## Prerequisites
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y dotnet-sdk-10.0 nodejs npm python3 nginx
 ```
 
-Runtime-only server では `dotnet-sdk-10.0` を `aspnetcore-runtime-10.0` に置き換え、publish は別 machine で実行します。
+For runtime-only servers, replace `dotnet-sdk-10.0` with `aspnetcore-runtime-10.0` and publish on another machine.
 
 ## Publish
 
@@ -23,9 +24,9 @@ sudo mkdir -p /opt/vehiclevision/jobrunner
 sudo rsync -a --delete ./publish/JobRunner/ /opt/vehiclevision/jobrunner/
 ```
 
-## systemd 設定
+## Configure systemd
 
-`/etc/systemd/system/jobrunner.service` を作成します。
+Create `/etc/systemd/system/jobrunner.service`:
 
 ```ini
 [Unit]
@@ -59,7 +60,7 @@ sudo systemctl enable --now jobrunner
 sudo systemctl status jobrunner
 ```
 
-## nginx 設定
+## Configure nginx
 
 ```nginx
 server {

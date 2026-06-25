@@ -1,16 +1,17 @@
-# Windows Server + IIS インストール
+# Windows Server + IIS Installation
 
-言語: 日本語 | [English](iis.en.md)
+Language: [日本語](iis.md) | English
 
-この guide は、IIS と ASP.NET Core Hosting Bundle を使う on-premises Windows Server を対象にしています。
 
-## 前提条件
+This guide targets an on-premises Windows Server running IIS and the ASP.NET Core Hosting Bundle.
 
-1. Build machine に .NET 10 SDK を install します。
-2. IIS server に ASP.NET Core Hosting Bundle 10.0 を install します。
-3. Build machine に Node.js 24 以降を install します。
-4. Python scripts を使う場合は IIS server に Python を install します。
-5. IIS features を有効にします: Web Server, Hosting Bundle 経由の ASP.NET Core Module, Web Management Tools.
+## Prerequisites
+
+1. Install .NET 10 SDK on the build machine.
+2. Install the ASP.NET Core Hosting Bundle 10.0 on the IIS server.
+3. Install Node.js 24 or later on the build machine.
+4. Install Python on the IIS server if Python scripts will be used.
+5. Enable IIS features: Web Server, ASP.NET Core Module through the Hosting Bundle, Web Management Tools.
 
 ## Publish
 
@@ -20,11 +21,11 @@ npm run build
 dotnet publish src/VehicleVision.Pleasanter.JobRunner.Web/VehicleVision.Pleasanter.JobRunner.Web.csproj -c Release -o .\publish\JobRunner
 ```
 
-`.\publish\JobRunner` を IIS server に copy します。例: `C:\inetpub\JobRunner`.
+Copy `.\publish\JobRunner` to the IIS server, for example `C:\inetpub\JobRunner`.
 
-## パラメーター設定
+## Configure parameters
 
-`C:\inetpub\JobRunner\App_Data\Parameters` に JSON files を作るか、IIS site の environment variables を設定します。
+Either create JSON files under `C:\inetpub\JobRunner\App_Data\Parameters`, or configure environment variables on the IIS site.
 
 JSON files:
 
@@ -47,7 +48,7 @@ JSON files:
 }
 ```
 
-IIS environment variables は `appcmd` で追加できます。
+IIS environment variables can be added with `appcmd`:
 
 ```powershell
 %windir%\system32\inetsrv\appcmd.exe set config "JobRunner" -section:system.webServer/aspNetCore /+"environmentVariables.[name='JobRunner__Rds__Dbms',value='SQLServer']" /commit:apphost
@@ -59,12 +60,12 @@ IIS environment variables は `appcmd` で追加できます。
 
 ## IIS site
 
-1. `JobRunner` という application pool を作成します。
-2. `.NET CLR version` を `No Managed Code` にします。
-3. `C:\inetpub\JobRunner` を指す site または application を作成します。
-4. Application pool identity が publish folder を読めるようにし、integrated security を使う場合は SQL Server に接続できるようにします。
-5. Site を restart します。
+1. Create an application pool named `JobRunner`.
+2. Set `.NET CLR version` to `No Managed Code`.
+3. Create a site or application pointing to `C:\inetpub\JobRunner`.
+4. Set the application pool identity so it can read the publish folder and connect to SQL Server if integrated security is used.
+5. Restart the site.
 
 ## Smoke test
 
-`/Account/Login` を開きます。Login 後に `/hangfire` を開きます。
+Open `/Account/Login`. After login, open `/hangfire`.

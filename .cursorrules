@@ -57,6 +57,9 @@ Follow these rules for every code change.
 
 ## Documentation
 
+- Japanese is the primary documentation language.
+- For user-facing Markdown documentation, keep a Japanese main file and an English sibling using the `.en.md` suffix when the document has both audiences.
+- When updating a localized document, update both the Japanese and English versions in the same change. If one side cannot be updated, call that out explicitly before finishing.
 - Use Mermaid for diagrams in Markdown files.
 - Do not add ASCII-art tree diagrams or text-only diagrams when a Mermaid diagram can express the same structure.
 
