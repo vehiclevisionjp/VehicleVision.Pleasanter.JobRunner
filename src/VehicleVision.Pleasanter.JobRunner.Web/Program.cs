@@ -1,6 +1,11 @@
+using Hangfire;
+using Hangfire.Console;
+using Hangfire.MemoryStorage;
 using VehicleVision.Pleasanter.JobRunner.Core.Authentication;
 using VehicleVision.Pleasanter.JobRunner.Core.Configuration;
 using VehicleVision.Pleasanter.JobRunner.Core.Data;
+using VehicleVision.Pleasanter.JobRunner.Core.Scripting;
+using VehicleVision.Pleasanter.JobRunner.Web.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +21,23 @@ builder.Services.AddSingleton<IPasswordHashVerifier>(sp =>
     return new PleasanterPasswordHashVerifier(parameters.AllowPlainTextPasswordHashForDevelopment);
 });
 builder.Services.AddScoped<PleasanterAuthService>();
+
+builder.Services.AddSingleton<IScriptExecutionEngine, CSharpScriptExecutionEngine>();
+builder.Services.AddSingleton<IScriptExecutionEngine>(sp =>
+{
+    var parameters = sp.GetRequiredService<JobRunnerParameters>();
+    return new PythonScriptExecutionEngine(parameters.PythonExecutablePath);
+});
+builder.Services.AddSingleton<ScriptExecutionDispatcher>();
+builder.Services.AddTransient<ScriptJob>();
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseMemoryStorage()
+    .UseConsole());
+builder.Services.AddHangfireServer();
 
 builder.Services.AddRazorPages();
 
