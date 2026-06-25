@@ -1,0 +1,55 @@
+# VehicleVision.Pleasanter.JobRunner AI Rules
+
+This repository builds a Pleasanter-compatible script execution management web application.
+Follow these rules for every code change.
+
+## Stack
+
+- Target framework: ASP.NET Core 8.0 unless a task explicitly upgrades the project.
+- Web UI: Razor Pages or MVC.
+- Background jobs: Hangfire.Core, Hangfire.AspNetCore, Hangfire.Console, and in-memory storage.
+- Dynamic C# execution: Microsoft.CodeAnalysis.CSharp.Scripting.
+- Data access: Dapper plus Microsoft.Data.SqlClient, Npgsql, and MySqlConnector.
+- Tests: xUnit and Moq.
+
+## Configuration
+
+- Do not introduce `appsettings.json` or bind runtime settings from it.
+- Runtime configuration must be read from `App_Data/Parameters/`, matching Pleasanter's layout.
+- `Rds.json` is the only source for database provider and connection string.
+- `JobRunner.json` is the only source for JobRunner-specific settings such as authorization check column and Python executable path.
+- Parameter loaders must fail with actionable messages when required JSON files or fields are missing.
+
+## Pleasanter database compatibility
+
+- Support all Pleasanter RDBMS targets: SQL Server, PostgreSQL, and MySQL.
+- Use Dapper for SQL execution.
+- Keep SQL as ANSI-friendly as possible and isolate dialect-specific identifier quoting in one place.
+- Never concatenate unvalidated user input into SQL.
+- Extension field column names such as `CheckA` must be validated as identifiers before being quoted.
+- Boolean values returned from extension fields must be normalized in .NET because SQL Server/MySQL may return bit/tinyint while PostgreSQL may return boolean.
+
+## Authentication and authorization
+
+- Authentication uses Pleasanter `Users.LoginId` and `Users.PasswordHash`.
+- Password verification must be isolated behind an interface so it can be aligned with the exact Pleasanter installation when needed.
+- Login authorization is hierarchical:
+  1. allow when the user's configured `CheckX` column is true;
+  2. otherwise allow when any joined `Groups` row has that `CheckX` true;
+  3. otherwise allow when the user's `Depts` row has that `CheckX` true;
+  4. otherwise deny.
+- Keep the authorization decision explicit in code and tests. Do not collapse the hierarchy into an unreadable SQL blob.
+
+## Script execution
+
+- C# scripts are evaluated with Roslyn scripting and must stream console output to Hangfire.Console.
+- Python scripts are written to a temporary file and executed through the configured `python` command.
+- Python standard output and standard error must be streamed to Hangfire.Console.
+- Treat script execution as privileged server-side code. Keep the UI and README clear that this application is for trusted administrators.
+
+## Project hygiene
+
+- Keep Core free of ASP.NET UI dependencies where practical.
+- Keep DB provider selection and SQL dialect behavior covered by tests when changed.
+- Keep generated code small and readable.
+- Do not add broad refactors unrelated to the current task.

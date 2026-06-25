@@ -1,0 +1,42 @@
+## Build results
+bin/
+obj/
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+## User/local files
+.vs/
+.vscode/*.user
+*.user
+*.suo
+*.rsuser
+*.userosscache
+*.sln.docstates
+
+## Rider / ReSharper
+.idea/
+_ReSharper*/
+*.DotSettings.user
+
+## NuGet
+*.nupkg
+packages/
+project.lock.json
+project.assets.json
+
+## Logs and runtime output
+*.log
+logs/
+tmp/
+temp/
+
+## OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## Local parameter overrides
+src/VehicleVision.Pleasanter.JobRunner.Web/App_Data/Parameters/*.local.json
