@@ -1,0 +1,229 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'SemVer version to release, with or without leading v'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark the GitHub Release as a prerelease'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  SOLUTION: VehicleVision.Pleasanter.JobRunner.slnx
+  WEB_PROJECT: src/VehicleVision.Pleasanter.JobRunner.Web/VehicleVision.Pleasanter.JobRunner.Web.csproj
+  PRODUCT_NAME: VehicleVision.Pleasanter.JobRunner
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release version
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG="${GITHUB_REF_NAME}"
+            VERSION="${TAG#v}"
+          else
+            if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+              echo "::error::workflow_dispatch releases must run from main"
+              exit 1
+            fi
+            VERSION="${INPUT_VERSION#v}"
+            if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+              echo "::error::version must be SemVer, for example 1.2.3 or 1.2.3-rc.1"
+              exit 1
+            fi
+            TAG="v${VERSION}"
+            if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+              echo "::error::Tag ${TAG} already exists"
+              exit 1
+            fi
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git tag -a "$TAG" -m "Release ${TAG}"
+            git push origin "$TAG"
+          fi
+
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag ${TAG} is not a supported SemVer release tag"
+            exit 1
+          fi
+
+          ASM_BASE="${VERSION%%-*}"
+          ASSEMBLY_VERSION="${ASM_BASE}.0"
+          PRERELEASE="false"
+          if [[ "$VERSION" == *-* ]] || [ "${INPUT_PRERELEASE:-false}" = "true" ]; then
+            PRERELEASE="true"
+          fi
+
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "assembly_version=${ASSEMBLY_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${PRERELEASE}" >> "$GITHUB_OUTPUT"
+          echo "Resolved ${TAG} (${VERSION}), prerelease=${PRERELEASE}"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build client assets
+        run: npm run build
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: npm audit
+        run: npm run audit
+
+      - name: Restore .NET dependencies
+        run: dotnet restore "$SOLUTION"
+
+      - name: Build .NET solution
+        run: dotnet build "$SOLUTION" --configuration Release --no-restore
+
+      - name: Test .NET solution
+        run: dotnet test "$SOLUTION" --configuration Release --no-build --logger trx --results-directory TestResults
+
+      - name: Publish release packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          VER='${{ steps.version.outputs.version }}'
+          ASM='${{ steps.version.outputs.assembly_version }}'
+          INFO="${VER}+sha.${GITHUB_SHA}"
+          mkdir -p dist
+
+          for RID in win-x64 linux-x64; do
+            OUT="artifacts/web/${RID}"
+            ZIP="${PRODUCT_NAME}-${VER}-${RID}.zip"
+            dotnet publish "$WEB_PROJECT" \
+              --configuration Release \
+              --runtime "$RID" \
+              --self-contained false \
+              -p:Version="$VER" \
+              -p:AssemblyVersion="$ASM" \
+              -p:FileVersion="$ASM" \
+              -p:InformationalVersion="$INFO" \
+              -o "$OUT"
+            (cd "$OUT" && zip -r "../../../dist/$ZIP" .)
+          done
+
+      - name: Package installers
+        shell: bash
+        run: |
+          set -euo pipefail
+          VER='${{ steps.version.outputs.version }}'
+          STAGE="staging/installers"
+          mkdir -p "$STAGE"
+          cp -r installers/* "$STAGE/"
+          (cd staging && zip -r "../dist/${PRODUCT_NAME}-installers-${VER}.zip" installers)
+
+      - name: Package documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          VER='${{ steps.version.outputs.version }}'
+          STAGE="staging/docs"
+          mkdir -p "$STAGE"
+          cp README.md README.en.md LICENSE "$STAGE/"
+          cp Pleasanter_DB_Schema_Hint.md "$STAGE/"
+          cp -r docs "$STAGE/"
+          (cd staging && zip -r "../dist/${PRODUCT_NAME}-docs-${VER}.zip" docs)
+
+      - name: Generate release notes
+        id: notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG='${{ steps.version.outputs.tag }}'
+          NOTES="dist/RELEASE_NOTES.md"
+          PREV_TAG=$(git tag --list 'v[0-9]*' --sort=-v:refname | grep -v "^${TAG}$" | head -n1 || true)
+          {
+            echo "## ${TAG}"
+            echo
+            if [ -n "$PREV_TAG" ]; then
+              echo "Changes since ${PREV_TAG}:"
+              echo
+              git log --pretty=format:'- %s (%h)' "${PREV_TAG}..${TAG}"
+              echo
+            else
+              echo "Recent changes:"
+              echo
+              git log --pretty=format:'- %s (%h)' -n 20 "$TAG"
+              echo
+            fi
+          } > "$NOTES"
+          cat "$NOTES"
+          echo "path=$NOTES" >> "$GITHUB_OUTPUT"
+
+      - name: Generate SHA256SUMS
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum *.zip > SHA256SUMS.txt)
+          cat dist/SHA256SUMS.txt
+
+      - name: Upload release build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ steps.version.outputs.version }}
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+            dist/RELEASE_NOTES.md
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          body_path: ${{ steps.notes.outputs.path }}
+          draft: false
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
