@@ -1,0 +1,29 @@
+{
+  "name": "vehiclevision-pleasanter-jobrunner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pleasanter-integrated script execution management web application.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:scss && npm run build:ts",
+    "build:scss": "sass --quiet-deps --load-path=node_modules src/VehicleVision.Pleasanter.JobRunner.Web/ClientApp/scss/site.scss src/VehicleVision.Pleasanter.JobRunner.Web/wwwroot/dist/site.css --style=compressed --no-source-map",
+    "build:ts": "esbuild src/VehicleVision.Pleasanter.JobRunner.Web/ClientApp/ts/app.ts --bundle --sourcemap --target=es2022 --outfile=src/VehicleVision.Pleasanter.JobRunner.Web/wwwroot/dist/app.js",
+    "watch:scss": "sass --watch --load-path=node_modules src/VehicleVision.Pleasanter.JobRunner.Web/ClientApp/scss/site.scss:src/VehicleVision.Pleasanter.JobRunner.Web/wwwroot/dist/site.css",
+    "watch:ts": "esbuild src/VehicleVision.Pleasanter.JobRunner.Web/ClientApp/ts/app.ts --bundle --sourcemap --target=es2022 --outfile=src/VehicleVision.Pleasanter.JobRunner.Web/wwwroot/dist/app.js --watch",
+    "audit": "npm audit --audit-level=moderate"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.8",
+    "knockout": "^3.5.1"
+  },
+  "devDependencies": {
+    "@types/knockout": "^3.4.79",
+    "esbuild": "^0.28.1",
+    "sass": "^1.97.0",
+    "typescript": "^5.9.3"
+  }
+}
+
+

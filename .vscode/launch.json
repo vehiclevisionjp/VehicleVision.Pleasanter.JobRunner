@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "dotnet build",
-      "program": "${workspaceFolder}/src/VehicleVision.Pleasanter.JobRunner.Web/bin/Debug/net8.0/VehicleVision.Pleasanter.JobRunner.Web.dll",
+      "program": "${workspaceFolder}/src/VehicleVision.Pleasanter.JobRunner.Web/bin/Debug/net10.0/VehicleVision.Pleasanter.JobRunner.Web.dll",
       "args": [],
       "cwd": "${workspaceFolder}/src/VehicleVision.Pleasanter.JobRunner.Web",
       "stopAtEntry": false,
@@ -24,3 +24,4 @@
     }
   ]
 }
+

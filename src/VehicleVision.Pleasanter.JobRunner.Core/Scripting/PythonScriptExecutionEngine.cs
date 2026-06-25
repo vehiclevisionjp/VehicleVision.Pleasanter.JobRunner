@@ -104,7 +104,7 @@ public sealed class PythonScriptExecutionEngine : IScriptExecutionEngine
         SemaphoreSlim writeLock,
         CancellationToken cancellationToken)
     {
-        while (!reader.EndOfStream)
+        while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var line = await reader.ReadLineAsync(cancellationToken);
@@ -142,3 +142,4 @@ public sealed class PythonScriptExecutionEngine : IScriptExecutionEngine
         }
     }
 }
+

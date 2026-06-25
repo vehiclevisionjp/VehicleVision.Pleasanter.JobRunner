@@ -1,16 +1,25 @@
+@use "bootstrap/scss/bootstrap" with (
+  $font-family-sans-serif: ("Segoe UI", Arial, sans-serif),
+  $border-radius: .375rem,
+  $border-radius-sm: .25rem,
+  $border-radius-lg: .5rem,
+  $primary: #1d5fd1,
+  $success: #16845b,
+  $danger: #b42318
+);
+
 :root {
   color-scheme: light;
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --surface-muted: #eef2f5;
-  --border: #d8dee5;
-  --text: #18212f;
-  --muted: #647084;
-  --blue: #1d5fd1;
-  --blue-dark: #164aa2;
-  --green: #16845b;
-  --amber: #9b6514;
-  --danger: #b42318;
+  --jr-bg: #f6f7f9;
+  --jr-surface: #ffffff;
+  --jr-surface-muted: #eef2f5;
+  --jr-border: #d8dee5;
+  --jr-text: #18212f;
+  --jr-muted: #647084;
+  --jr-blue: #1d5fd1;
+  --jr-blue-dark: #164aa2;
+  --jr-green: #16845b;
+  --jr-danger: #b42318;
 }
 
 * {
@@ -24,9 +33,8 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--jr-bg);
+  color: var(--jr-text);
   font-size: 14px;
 }
 
@@ -38,8 +46,8 @@ textarea {
 }
 
 .app-header {
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  border-bottom: 1px solid var(--jr-border);
+  background: var(--jr-surface);
 }
 
 .app-nav {
@@ -53,7 +61,7 @@ textarea {
 }
 
 .brand {
-  color: var(--text);
+  color: var(--jr-text);
   font-size: 17px;
   font-weight: 700;
   text-decoration: none;
@@ -63,21 +71,20 @@ textarea {
   display: flex;
   align-items: center;
   gap: 16px;
-}
 
-.nav-links a,
-.nav-links button {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 6px 0;
-  text-decoration: none;
-}
+  a,
+  button {
+    border: 0;
+    background: transparent;
+    color: var(--jr-muted);
+    cursor: pointer;
+    padding: 6px 0;
+    text-decoration: none;
 
-.nav-links a:hover,
-.nav-links button:hover {
-  color: var(--text);
+    &:hover {
+      color: var(--jr-text);
+    }
+  }
 }
 
 .app-main {
@@ -92,37 +99,32 @@ textarea {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
-}
 
-.page-heading h1,
-.auth-panel h1,
-.panel-header h2 {
-  margin: 0;
-  letter-spacing: 0;
-}
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
 
-.page-heading h1 {
-  font-size: 24px;
-  line-height: 1.2;
-}
-
-.page-heading p {
-  margin: 4px 0 0;
-  color: var(--muted);
+  p {
+    margin: 4px 0 0;
+    color: var(--jr-muted);
+  }
 }
 
 .workspace-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(360px, 0.9fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(360px, .9fr);
   gap: 16px;
   align-items: start;
 }
 
 .tool-panel,
 .auth-panel {
-  border: 1px solid var(--border);
+  border: 1px solid var(--jr-border);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--jr-surface);
 }
 
 .editor-panel {
@@ -138,12 +140,14 @@ textarea {
   align-items: center;
   min-height: 52px;
   padding: 0 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-muted);
-}
+  border-bottom: 1px solid var(--jr-border);
+  background: var(--jr-surface-muted);
 
-.panel-header h2 {
-  font-size: 15px;
+  h2 {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: 0;
+  }
 }
 
 .job-form,
@@ -174,7 +178,7 @@ textarea {
 }
 
 label {
-  color: var(--muted);
+  color: var(--jr-muted);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
@@ -184,10 +188,10 @@ input,
 select,
 textarea {
   width: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--jr-border);
   border-radius: 6px;
   background: #fff;
-  color: var(--text);
+  color: var(--jr-text);
   outline: none;
 }
 
@@ -209,8 +213,8 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(29, 95, 209, 0.16);
+  border-color: var(--jr-blue);
+  box-shadow: 0 0 0 3px rgba(29, 95, 209, .16);
 }
 
 .actions {
@@ -232,30 +236,30 @@ textarea:focus {
 }
 
 .primary-action {
-  border: 1px solid var(--blue);
-  background: var(--blue);
+  border: 1px solid var(--jr-blue);
+  background: var(--jr-blue);
   color: #fff;
-}
 
-.primary-action:hover {
-  border-color: var(--blue-dark);
-  background: var(--blue-dark);
+  &:hover {
+    border-color: var(--jr-blue-dark);
+    background: var(--jr-blue-dark);
+  }
 }
 
 .secondary-action {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-}
+  border: 1px solid var(--jr-border);
+  background: var(--jr-surface);
+  color: var(--jr-text);
 
-.secondary-action:hover {
-  border-color: var(--blue);
-  color: var(--blue);
+  &:hover {
+    border-color: var(--jr-blue);
+    color: var(--jr-blue);
+  }
 }
 
 .status-message {
   margin-bottom: 16px;
-  border-left: 4px solid var(--green);
+  border-left: 4px solid var(--jr-green);
   border-radius: 6px;
   background: #edf8f3;
   color: #0f5132;
@@ -265,7 +269,7 @@ textarea:focus {
 .validation-summary,
 .field-validation,
 .field-validation-error {
-  color: var(--danger);
+  color: var(--jr-danger);
 }
 
 .validation-summary ul {
@@ -277,27 +281,27 @@ textarea:focus {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-}
 
-.job-table th,
-.job-table td {
-  border-bottom: 1px solid var(--border);
-  padding: 10px 12px;
-  text-align: left;
-  vertical-align: top;
-  word-break: break-word;
-}
+  th,
+  td {
+    border-bottom: 1px solid var(--jr-border);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+    word-break: break-word;
+  }
 
-.job-table th {
-  color: var(--muted);
-  font-size: 12px;
-  text-transform: uppercase;
+  th {
+    color: var(--jr-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+  }
 }
 
 .empty-state {
   margin: 0;
   padding: 18px 16px;
-  color: var(--muted);
+  color: var(--jr-muted);
 }
 
 .auth-shell {
@@ -309,11 +313,12 @@ textarea:focus {
 .auth-panel {
   width: min(420px, 100%);
   padding: 24px;
-}
 
-.auth-panel h1 {
-  margin-bottom: 18px;
-  font-size: 24px;
+  h1 {
+    margin: 0 0 18px;
+    font-size: 24px;
+    letter-spacing: 0;
+  }
 }
 
 @media (max-width: 900px) {

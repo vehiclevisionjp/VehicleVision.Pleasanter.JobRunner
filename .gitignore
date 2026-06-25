@@ -40,3 +40,14 @@ desktop.ini
 
 ## Local parameter overrides
 src/VehicleVision.Pleasanter.JobRunner.Web/App_Data/Parameters/*.local.json
+
+## Node / frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+## Local publish output
+publish/
+artifacts/

@@ -18,7 +18,7 @@
     <div class="status-message">@Model.StatusMessage</div>
 }
 
-<div class="workspace-grid">
+<div class="workspace-grid" data-jobrunner-app>
     <section class="tool-panel editor-panel">
         <form method="post" class="job-form">
             <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
@@ -31,14 +31,17 @@
                 </div>
                 <div>
                     <label asp-for="Input.Language"></label>
-                    <select asp-for="Input.Language" asp-items="Html.GetEnumSelectList<ScriptLanguage>()"></select>
+                    <select asp-for="Input.Language" asp-items="Html.GetEnumSelectList<ScriptLanguage>()" data-jobrunner-language data-bind="value: selectedLanguage"></select>
                     <span asp-validation-for="Input.Language" class="field-validation"></span>
                 </div>
             </div>
 
             <div class="form-row">
-                <label asp-for="Input.ScriptCode"></label>
-                <textarea asp-for="Input.ScriptCode" spellcheck="false"></textarea>
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <label asp-for="Input.ScriptCode"></label>
+                    <button type="button" class="secondary-action" data-bind="click: useSample, text: sampleButtonText"></button>
+                </div>
+                <textarea asp-for="Input.ScriptCode" spellcheck="false" data-jobrunner-code data-bind="value: scriptCode, valueUpdate: 'input'"></textarea>
                 <span asp-validation-for="Input.ScriptCode" class="field-validation"></span>
             </div>
 
