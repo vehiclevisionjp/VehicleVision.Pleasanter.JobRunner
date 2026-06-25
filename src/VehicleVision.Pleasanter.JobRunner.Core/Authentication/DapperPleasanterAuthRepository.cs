@@ -71,12 +71,12 @@ public sealed class DapperPleasanterAuthRepository : IPleasanterAuthRepository
         using var connection = _connectionFactory.CreateConnection();
         await OpenAsync(connection, cancellationToken);
 
-        var values = await connection.QueryAsync<object?>(new CommandDefinition(
+        var values = await connection.QueryAsync<AuthorizationValueRow>(new CommandDefinition(
             sql,
             new { UserId = userId },
             cancellationToken: cancellationToken));
 
-        return values.Any(DbValueConverter.ToBoolean);
+        return values.Any(row => DbValueConverter.ToBoolean(row.AuthorizationValue));
     }
 
     public async Task<bool> IsDeptAuthorizedAsync(long deptId, CancellationToken cancellationToken = default)
@@ -90,12 +90,12 @@ public sealed class DapperPleasanterAuthRepository : IPleasanterAuthRepository
         using var connection = _connectionFactory.CreateConnection();
         await OpenAsync(connection, cancellationToken);
 
-        var value = await connection.QuerySingleOrDefaultAsync<object?>(new CommandDefinition(
+        var row = await connection.QuerySingleOrDefaultAsync<AuthorizationValueRow>(new CommandDefinition(
             sql,
             new { DeptId = deptId },
             cancellationToken: cancellationToken));
 
-        return DbValueConverter.ToBoolean(value);
+        return DbValueConverter.ToBoolean(row?.AuthorizationValue);
     }
 
     private static async Task OpenAsync(IDbConnection connection, CancellationToken cancellationToken)
@@ -119,6 +119,11 @@ public sealed class DapperPleasanterAuthRepository : IPleasanterAuthRepository
 
         public long? DeptId { get; init; }
 
+        public object? AuthorizationValue { get; init; }
+    }
+
+    private sealed class AuthorizationValueRow
+    {
         public object? AuthorizationValue { get; init; }
     }
 }
