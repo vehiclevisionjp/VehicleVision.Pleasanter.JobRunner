@@ -1,11 +1,8 @@
 import "bootstrap";
 import * as ko from "knockout";
 
-type KoObservable<T> = {
-  (): T;
-  (value: T): void;
-};
-type KoComputed<T> = () => T;
+type KoObservable<T> = ko.Observable<T>;
+type KoComputed<T> = ko.Computed<T>;
 
 const scriptSamples: Record<string, string> = {
   CSharp: 'Console.WriteLine("Hello from C#");',
