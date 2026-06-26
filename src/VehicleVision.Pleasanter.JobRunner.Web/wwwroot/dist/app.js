@@ -8174,7 +8174,14 @@
   var ko = __toESM(require_knockout_latest(), 1);
   var scriptSamples = {
     CSharp: 'Console.WriteLine("Hello from C#");',
-    Python: 'print("Hello from Python")'
+    Python: 'print("Hello from Python")',
+    ClearScript: [
+      'context.log("Hello from ClearScript");',
+      "console.log({ jobName: context.jobName, language: context.language });",
+      "",
+      '// Example: const user = items.get("Users", "UserId", 1);',
+      '// Example: const rows = items.query("SELECT * FROM Users WHERE LoginId = @LoginId", { LoginId: "admin" });'
+    ].join("\n")
   };
   var JobRunnerViewModel = class {
     selectedLanguage;

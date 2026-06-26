@@ -2,12 +2,13 @@
 
 Language: [日本語](README.md) | English
 
-VehicleVision.Pleasanter.JobRunner is a web application for managing C# and Python script execution within the same operational boundary as Pleasanter.
+VehicleVision.Pleasanter.JobRunner is a web application for managing C#, Python, and ClearScript (JavaScript) script execution within the same operational boundary as Pleasanter.
 
 - ASP.NET Core 10 Razor Pages
 - Hangfire + Hangfire.Console + Memory / SQL Server / PostgreSQL storage
 - C# dynamic scripting via Roslyn
 - Python external process execution
+- JavaScript execution via ClearScript/V8
 - Dapper based SQL Server / PostgreSQL / MySQL access
 - TypeScript + Knockout.js binding
 - SCSS + Bootstrap SCSS from npm
@@ -137,6 +138,27 @@ Supported `Dbms` values:
 
 `AuthorizationCheckColumn` is still accepted as a backward-compatible fallback, but new deployments should use the table-specific settings.
 
+### ClearScript host API
+
+ClearScript runs V8 JavaScript and exposes a small host API with a Pleasanter server-script-like feel. It is not a full compatibility layer.
+
+```javascript
+context.log("hello");
+console.warn({ jobName: context.jobName });
+const users = items.where("Users", "LoginId", "admin", 10);
+```
+
+Main methods:
+
+- `console.log/info/warn/error(...)`
+- `context.log/info/warn/error(...)`, `context.jobName`, `context.language`, `context.now()`
+- `items.get(tableName, keyColumnName, keyValue)`
+- `items.where(tableName, columnName, value, limit)`
+- `items.query(sql, parameters)`, `items.execute(sql, parameters)`
+- `items.update(tableName, keyColumnName, keyValue, values)`, `items.insert(tableName, values)`
+
+`items` uses the Pleasanter database connection from `Rds.json`. Table and column names must be simple identifiers, and values are parameterized. `items.query` and `items.execute` run raw SQL, so expose this only to trusted administrators.
+
 ## Environment variables
 
 Use double underscores for nested keys:
@@ -232,6 +254,7 @@ Because this is a network application, modified versions offered over a network 
 
 ## Security notes
 
-JobRunner executes arbitrary C# and Python code on the server. Deploy it only for trusted administrators and inside the same operational boundary as the Pleasanter instance it manages.
+JobRunner executes arbitrary C#, Python, and ClearScript (JavaScript) code on the server. Deploy it only for trusted administrators and inside the same operational boundary as the Pleasanter instance it manages.
 
 Hangfire uses memory storage by default. Configure `HangfireRds.json` or `JobRunner__HangfireRds__...` with a separate SQL Server or PostgreSQL database before multi-instance production deployment. MySQL is intentionally not supported for Hangfire storage in this project.
+

@@ -15,6 +15,14 @@ public sealed class IndexModel : PageModel
 {
     private const string DefaultCSharp = "Console.WriteLine(\"Hello from C#\");";
     private const string DefaultPython = "print(\"Hello from Python\")";
+    private const string DefaultClearScript = """
+        context.log("Hello from ClearScript");
+        console.log({ jobName: context.jobName, language: context.language });
+
+        // Example: const user = items.get("Users", "UserId", 1);
+        // Example: const rows = items.query("SELECT * FROM Users WHERE LoginId = @LoginId", { LoginId: "admin" });
+        """;
+
     private readonly IBackgroundJobClient _backgroundJobs;
     private readonly IRecurringJobManager _recurringJobs;
 
@@ -78,7 +86,12 @@ public sealed class IndexModel : PageModel
 
     public string GetSampleForSelectedLanguage()
     {
-        return Input.Language == ScriptLanguage.Python ? DefaultPython : DefaultCSharp;
+        return Input.Language switch
+        {
+            ScriptLanguage.Python => DefaultPython,
+            ScriptLanguage.ClearScript => DefaultClearScript,
+            _ => DefaultCSharp
+        };
     }
 
     private ScriptExecutionRequest CreateRequest()

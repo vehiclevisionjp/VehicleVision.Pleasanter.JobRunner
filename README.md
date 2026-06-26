@@ -2,12 +2,13 @@
 
 言語: 日本語 | [English](README.en.md)
 
-VehicleVision.Pleasanter.JobRunner は、Pleasanter と同じ運用領域に配置して使う、C# / Python スクリプトの実行を管理する Web アプリケーションです。
+VehicleVision.Pleasanter.JobRunner は、Pleasanter と同じ運用領域に配置して使う、C# / Python / ClearScript(JavaScript) スクリプトの実行を管理する Web アプリケーションです。
 
 - ASP.NET Core 10 Razor Pages
 - Hangfire + Hangfire.Console + メモリ / SQL Server / PostgreSQL ストレージ
 - Roslyn による C# 動的スクリプト実行
 - 外部プロセスとしての Python 実行
+- ClearScript/V8 による JavaScript 実行
 - Dapper による SQL Server / PostgreSQL / MySQL 接続
 - TypeScript + Knockout.js
 - npm から取得した Bootstrap SCSS によるスタイルビルド
@@ -137,6 +138,27 @@ Hangfire のテーブルや運用データを分離するため、Pleasanter 用
 
 `AuthorizationCheckColumn` は後方互換用の代替設定として引き続き受け付けます。ただし、新しい環境ではテーブルごとの設定を使ってください。
 
+### ClearScript ホスト API
+
+ClearScript は V8 JavaScript として実行され、Pleasanter のサーバスクリプトに近い感覚で使える簡易ホスト API を公開します。完全互換ではありません。
+
+```javascript
+context.log("hello");
+console.warn({ jobName: context.jobName });
+const users = items.where("Users", "LoginId", "admin", 10);
+```
+
+利用できる主なメソッド:
+
+- `console.log/info/warn/error(...)`
+- `context.log/info/warn/error(...)`, `context.jobName`, `context.language`, `context.now()`
+- `items.get(tableName, keyColumnName, keyValue)`
+- `items.where(tableName, columnName, value, limit)`
+- `items.query(sql, parameters)`, `items.execute(sql, parameters)`
+- `items.update(tableName, keyColumnName, keyValue, values)`, `items.insert(tableName, values)`
+
+`items` は `Rds.json` の Pleasanter DB 接続を使います。テーブル名・カラム名は単純な識別子のみ受け付け、値はパラメーター化されます。`items.query` と `items.execute` は SQL をそのまま実行するため、信頼できる管理者だけが使ってください。
+
 ## 環境変数
 
 階層化されたキーには 2 つのアンダースコアを使います。
@@ -232,6 +254,6 @@ Dependabot は NuGet、npm、GitHub Actions 用に設定されています。
 
 ## セキュリティメモ
 
-JobRunner は、サーバー上で任意の C# / Python コードを実行します。信頼できる管理者だけが使えるようにし、管理対象の Pleasanter インスタンスと同じ運用境界の内側に配置してください。
+JobRunner は、サーバー上で任意の C# / Python / ClearScript(JavaScript) コードを実行します。信頼できる管理者だけが使えるようにし、管理対象の Pleasanter インスタンスと同じ運用境界の内側に配置してください。
 
 Hangfire は既定ではメモリストレージを使います。複数インスタンス構成の本番環境で使う前に、`HangfireRds.json` または `JobRunner__HangfireRds__...` で Hangfire 専用の SQL Server または PostgreSQL データベースを設定してください。MySQL は、このプロジェクトの Hangfire ストレージとしては意図的にサポートしていません。

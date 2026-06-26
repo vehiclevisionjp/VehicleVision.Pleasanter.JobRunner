@@ -45,6 +45,11 @@ builder.Services.AddSingleton<IScriptExecutionEngine>(sp =>
     var parameters = sp.GetRequiredService<JobRunnerParameters>();
     return new PythonScriptExecutionEngine(parameters.PythonExecutablePath);
 });
+builder.Services.AddSingleton<IScriptExecutionEngine>(sp =>
+{
+    var connectionFactory = sp.GetRequiredService<IDbConnectionFactory>();
+    return new ClearScriptExecutionEngine(connectionFactory);
+});
 builder.Services.AddSingleton<ScriptExecutionDispatcher>();
 builder.Services.AddTransient<ScriptJob>();
 
