@@ -1,6 +1,9 @@
 import "bootstrap";
 import * as ko from "knockout";
 
+type KoObservable<T> = ko.Observable<T>;
+type KoComputed<T> = ko.Computed<T>;
+
 const scriptSamples: Record<string, string> = {
   CSharp: 'Console.WriteLine("Hello from C#");',
   Python: 'print("Hello from Python")',
@@ -14,9 +17,9 @@ const scriptSamples: Record<string, string> = {
 };
 
 class JobRunnerViewModel {
-  readonly selectedLanguage: KnockoutObservable<string>;
-  readonly scriptCode: KnockoutObservable<string>;
-  readonly sampleButtonText: KnockoutComputed<string>;
+  readonly selectedLanguage: KoObservable<string>;
+  readonly scriptCode: KoObservable<string>;
+  readonly sampleButtonText: KoComputed<string>;
 
   constructor(root: HTMLElement) {
     const languageSelect = root.querySelector<HTMLSelectElement>("[data-jobrunner-language]");
@@ -42,4 +45,3 @@ function applyJobRunnerBindings(): void {
 }
 
 document.addEventListener("DOMContentLoaded", applyJobRunnerBindings);
-
